@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [post, comment, share, auth, user, notification]  # All your services
+        service: [client, comments, event-bus, moderation, posts, query]  
         scan-type: [sca, container]  # Run both SCA and container scans
     steps:
       - name: Checkout code

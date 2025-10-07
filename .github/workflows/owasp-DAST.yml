@@ -1,4 +1,4 @@
-name: Trivy Security Scanning
+name: OWASP ZAP DAST
 
 on:
     workflow_dispatch:
