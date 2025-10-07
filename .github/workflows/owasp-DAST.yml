@@ -26,20 +26,7 @@ jobs:
         continue-on-error: true
         with:
           target: 'http://localhost:3000'
-          report_md: 'zap-report.md'
-          report_html: 'zap-report.html'
-          report_json: 'zap-report.json'
           cmd_options: '-a -I'
-
-      - name: Upload ZAP Reports
-        uses: actions/upload-artifact@v4 
-        with:
-          name: zap-security-reports
-          path: |
-            zap-report.html
-            zap-report.json  
-            zap-report.md
-          retention-days: 1
 
       - name: Tear Down
         if: always()
