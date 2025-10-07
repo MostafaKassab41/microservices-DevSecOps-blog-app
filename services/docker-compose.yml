@@ -1,0 +1,71 @@
+version: '3.9'
+ 
+
+services:
+  posts:
+    build: ./posts
+    image: micro-posts:mini2
+    container_name: posts-srv
+    ports:
+      - "4000:4000"
+    environment:
+      EVENT_BUS_SERVICE_URL: http://event-bus-srv:4005
+      PORT: 4000
+    
+
+  comments:
+    build: ./comments
+    image: micro-comments:mini2
+    container_name: comments-srv
+    ports:
+      - "4001:4001"
+    environment:
+      EVENT_BUS_SERVICE_URL: http://event-bus-srv:4005
+      PORT: 4001
+
+  query:
+    build: ./query
+    image: micro-query:mini2
+    container_name: query-srv
+    ports:
+      - "4002:4002"
+    environment:
+      EVENT_BUS_SERVICE_URL: http://event-bus-srv:4005
+      PORT: 4002
+    depends_on:
+      - event-bus
+
+
+
+  moderation:
+    build: ./moderation
+    image: micro-moderation:mini2
+    container_name: moderation-srv
+    ports:
+      - "4003:4003"
+    environment:
+      EVENT_BUS_SERVICE_URL: http://event-bus-srv:4005
+      PORT: 4003
+
+  event-bus:
+    build: ./event-bus
+    image: micro-event-bus:mini2
+    container_name: event-bus-srv
+    ports:
+      - "4005:4005"
+    environment:
+      POSTS_SERVICE_URL: http://posts-srv:4000
+      COMMENTS_SERVICE_URL: http://comments-srv:4001
+      QUERY_SERVICE_URL: http://query-srv:4002
+      MODERATION_SERVICE_URL: http://moderation-srv:4003
+      PORT: 4005
+
+  client:
+    build: ./client
+    image: micro-client:test10
+    container_name: client-srv
+    ports:
+      - "3000:80"  
+    environment:
+      REACT_APP_POSTS_SERVICE_URL: http://localhost:4002
+      REACT_APP_COMMENTS_SERVICE_URL: http://localhost:4001
