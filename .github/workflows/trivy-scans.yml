@@ -4,6 +4,7 @@ on:
     workflow_dispatch:
 
 jobs:
+
   # Phase 3: Trivy Security Scanning
   trivy-security-scans:
     name: Security Scan - All Services
@@ -22,8 +23,7 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: './app-services/${{ matrix.service }}'
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}-sca-results.sarif'
+          format: 'table'
           exit-code: 0
           severity: 'CRITICAL,HIGH,MEDIUM'
       
@@ -37,6 +37,22 @@ jobs:
         with:
           scan-type: 'image'
           scan-ref: '${{ matrix.service }}-service:${{ github.sha }}'
+          format: 'table'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH'
+
+  trivy-config:
+    name: ⚙️ Trivy Config Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Run Trivy Config Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: './app-services'  # Scan all config files
           format: 'table'
           exit-code: 0
           severity: 'CRITICAL,HIGH'
