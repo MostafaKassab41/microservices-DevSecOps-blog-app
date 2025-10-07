@@ -1,0 +1,27 @@
+name: Semgrep SAST
+
+on:
+    workflow_dispatch:
+
+jobs:
+  # Phase 1: Semgrep SAST
+  semgrep-sast:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Run Semgrep Security Scan
+        uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
+        with:
+          config: p/default
+          outputFormat: txt
+          
+      - name: Scan Complete
+        if: always()
+        run: |
+          echo "✅ Semgrep scan completed"
+          echo "Findings are shown above for review"
+          echo "Build continues regardless of findings"

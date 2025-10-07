@@ -1,0 +1,48 @@
+name: Trivy Security Scanning
+
+on:
+    workflow_dispatch:
+
+jobs:
+  # Phase 3: Trivy Security Scanning
+  trivy-security-scans:
+    name: Security Scan - All Services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [post, comment, share, auth, user, notification]  # All your services
+        scan-type: [sca, container]  # Run both SCA and container scans
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: SCA Scan for ${{ matrix.service }}
+        if: matrix.scan-type == 'sca'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './app-services/${{ matrix.service }}'
+          format: 'sarif'
+          output: 'trivy-${{ matrix.service }}-sca-results.sarif'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH,MEDIUM'
+      
+      - name: Build ${{ matrix.service }} Docker Image
+        if: matrix.scan-type == 'container'
+        run: docker build -t ${{ matrix.service }}-service:${{ github.sha }} ./app-services/${{ matrix.service }}
+      
+      - name: Container Scan for ${{ matrix.service }}
+        if: matrix.scan-type == 'container'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scan-ref: '${{ matrix.service }}-service:${{ github.sha }}'
+          format: 'table'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Upload SCA SARIF Results
+        if: matrix.scan-type == 'sca' && always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-${{ matrix.service }}-sca-results.sarif'
