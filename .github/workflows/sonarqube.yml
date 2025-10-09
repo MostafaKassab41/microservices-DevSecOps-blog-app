@@ -1,0 +1,44 @@
+name: SonarQube Analysis
+
+on:
+    workflow_dispatch:
+
+jobs:
+  # Phase 2: SonarQube SAST
+  sonar-scan:
+    name: SonarQube Code Quality Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Setup Node.js (for JavaScript analysis)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies for all services
+        run: |
+            for dir in app-services/*; do
+            if [ -f "$dir/package.json" ]; then
+                echo "Installing dependencies in $dir"
+                (cd "$dir" && npm ci)
+            fi
+            done
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        continue-on-error: true
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+

@@ -22,7 +22,6 @@ jobs:
         continue-on-error: true
         with:
           config: p/default
-          outputFormat: txt
           
       - name: Scan Complete
         if: always()
@@ -120,7 +119,6 @@ jobs:
         continue-on-error: true
         with:
           target: 'http://localhost:3000'
-          report_name: 'zap_report.html'
           cmd_options: '-a -I'
 
       - name: Upload ZAP Report
