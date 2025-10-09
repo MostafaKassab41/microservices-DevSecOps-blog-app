@@ -39,6 +39,12 @@ jobs:
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=devsecops-blog-app
+            -Dsonar.projectName="DevSecOps Blog Application"
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**
       
       - name: Check Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@master
