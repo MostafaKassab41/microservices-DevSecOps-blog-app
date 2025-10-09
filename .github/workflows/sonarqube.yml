@@ -14,12 +14,6 @@ jobs:
         with:
           fetch-depth: 0 
 
-      - name: Setup Node.js (for JavaScript analysis)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-
       - name: Install dependencies for all services
         run: |
             for dir in app-services/*; do
