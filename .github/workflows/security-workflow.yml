@@ -30,17 +30,43 @@ jobs:
           echo "Findings are shown above for review"
           echo "Build continues regardless of findings"
 
+
   # Phase 2: SonarQube SAST
-  sonarqube:
-    if: false
-    name: SonarQube Analysis
+  sonar-scan:
+    name: SonarQube Code Quality Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      
+          fetch-depth: 0 
+
+      - name: Install dependencies for all services
+        run: |
+            for dir in app-services/*; do
+            if [ -f "$dir/package.json" ]; then
+                echo "Installing dependencies in $dir"
+                (cd "$dir" && npm ci)
+            fi
+            done
+
+      - name: Debug SonarQube Connection
+        run: |
+          echo "SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}"
+          # Test basic connectivity 
+          if curl -v $SONAR_HOST_URL/api/server/version | grep "200 OK"; then
+            echo "✅ SonarQube server is reachable"
+          else
+            echo "❌ Cannot reach SonarQube server"
+          fi
+
+          # Test with your token
+          if curl -u $SONAR_TOKEN: $SONAR_HOST_URL/api/server/version | grep "200 OK"; then
+            echo "✅ Testing SonarQube server and Token is successful"
+          else
+            echo "❌ Testing SonarQube server and Token is not successful"
+          fi
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
@@ -49,18 +75,21 @@ jobs:
       
       - name: Check Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@master
-        continue-on-error: true     # Let pipeline continue even if quality gate fails just for testing
+        continue-on-error: true
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+
 
   # Phase 3: Trivy Security Scanning
   trivy-security-scans:
     name: Security Scan - All Services
     runs-on: ubuntu-latest
+    needs: [semgrep-sast, sonar-scan]
     strategy:
       matrix:
-        service: [post, comment, share, auth, user, notification]  # All your services
+        service: [client, comments, event-bus, moderation, posts, query]  
         scan-type: [sca, container]  # Run both SCA and container scans
     steps:
       - name: Checkout code
@@ -72,8 +101,7 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: './app-services/${{ matrix.service }}'
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}-sca-results.sarif'
+          format: 'table'
           exit-code: 0
           severity: 'CRITICAL,HIGH,MEDIUM'
       
@@ -90,53 +118,72 @@ jobs:
           format: 'table'
           exit-code: 0
           severity: 'CRITICAL,HIGH'
+
+  trivy-config:
+    name: Trivy Config Files Scan
+    runs-on: ubuntu-latest
+    needs: [semgrep-sast, sonar-scan]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       
-      - name: Upload SCA SARIF Results
-        if: matrix.scan-type == 'sca' && always()
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Run Trivy Config Scan
+        uses: aquasecurity/trivy-action@master
         with:
-          sarif_file: 'trivy-${{ matrix.service }}-sca-results.sarif'
+          scan-type: 'config'
+          scan-ref: './app-services'  # Scan all config files
+          format: 'table'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH'
+
 
   # Phase 4: OWASP ZAP DAST
   zap-dast:
     name: OWASP ZAP DAST
     runs-on: ubuntu-latest
+    needs: [semgrep-sast, sonar-scan]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build and Deploy
-        run: docker-compose -f app-services/docker-compose.yml up -d --build
-
-      - name: Wait for app to start
-        run: sleep 15
+        run: docker compose -f app-services/docker-compose.yml up -d --build
 
       - name: Health Check
-        run: curl -f http://localhost:3000 || exit 1
+        id: healthcheck
+        run: |
+          echo "Waiting for application to be healthy..."
+          for i in {1..30}; do
+            if curl -s -f http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✅ Application is healthy!"
+              exit 0
+            fi
+            echo "⏳ Application not ready yet (attempt $i/30)"
+            sleep 10
+          done
+          echo "❌ Application failed to become healthy"
+          exit 1
 
       - name: Run OWASP ZAP Baseline Scan
+        if: steps.healthcheck.outcome == 'success'
         uses: zaproxy/action-baseline@v0.10.0
         continue-on-error: true
         with:
           target: 'http://localhost:3000'
           cmd_options: '-a -I'
 
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: zap-report
-          path: zap_report.html
-          retention-days: 7
-
       - name: Tear Down
         if: always()
-        run: docker-compose -f app-services/docker-compose.yml down
+        run: docker compose -f app-services/docker-compose.yml down
+      
+
+  
 
   # Final Summary
   security-summary:
     name: Security Scan Summary
     runs-on: ubuntu-latest
-    needs: [semgrep-sast, sonarqube, trivy-security-scans, zap-dast]
+    needs: [semgrep-sast, sonar-scan, trivy-security-scans, zap-dast]
     if: always()
     steps:
       - name: Generate Comprehensive Report
@@ -154,5 +201,3 @@ jobs:
           echo "### 📋 Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "1. Review findings from each scan above" >> $GITHUB_STEP_SUMMARY
           echo "2. Fix CRITICAL/HIGH severity issues first" >> $GITHUB_STEP_SUMMARY
-          echo "3. Download ZAP report from Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "4. Check SARIF results in Security tab" >> $GITHUB_STEP_SUMMARY
