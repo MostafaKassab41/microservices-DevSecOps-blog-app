@@ -37,6 +37,7 @@ docker compose up -d
 > ```bash
 > sudo sysctl -w vm.max_map_count=262144
 > ``` 
+> Wait 2-3 minutes for SonarQube server initial setup to complete
 
 ### 3. Access the Services
 - SonarQube UI: http://localhost:9000
