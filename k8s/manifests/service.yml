@@ -1,0 +1,106 @@
+# Frontend client service
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-srv
+  namespace: test
+spec:
+  type: NodePort
+  selector:
+    app: client
+    env: test
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30000
+
+---
+
+# Event bus service
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-bus-srv
+  namespace: test
+spec:
+  type: ClusterIP
+  selector:
+    app: event-bus
+    env: test
+  ports:
+    - protocol: TCP
+      port: 4005
+      targetPort: 4005
+
+---
+
+# Moderation service
+apiVersion: v1
+kind: Service
+metadata:
+  name: moderation-srv
+  namespace: test
+spec:
+  type: ClusterIP
+  selector:
+    app: moderation
+    env: test
+  ports:
+    - protocol: TCP
+      port: 4003
+      targetPort: 4003
+
+---
+
+# Query service
+apiVersion: v1
+kind: Service
+metadata:
+  name: query-srv
+  namespace: test
+spec:
+  type: ClusterIP
+  selector:
+    app: query
+    env: test
+  ports:
+    - protocol: TCP
+      port: 4002
+      targetPort: 4002
+
+---
+
+# Comments service
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-srv
+  namespace: test
+spec:
+  type: ClusterIP
+  selector:
+    app: comments
+    env: test
+  ports:
+    - protocol: TCP
+      port: 4001
+      targetPort: 4001
+
+---
+
+# Posts service
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-srv
+  namespace: test
+spec:
+  type: ClusterIP
+  selector:
+    app: posts
+    env: test
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000

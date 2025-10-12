@@ -1,0 +1,239 @@
+# Frontend client deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-client
+  namespace: test
+  labels:
+    app: client
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+      env: test
+  template:
+    metadata:
+      labels:
+        app: client
+        env: test
+    spec:
+      containers:
+      - name: client
+        image: micro-client:test10
+        ports:
+        - containerPort: 80
+        env:
+        - name: REACT_APP_POSTS_SERVICE_URL
+          value: http://query-srv:4002     #http://localhost:4002
+        - name: REACT_APP_COMMENTS_SERVICE_URL
+          value: http://localhost:4001
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
+---
+
+# Event bus deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-event-bus
+  namespace: test
+  labels:
+    app: event-bus
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-bus
+      env: test
+  template:
+    metadata:
+      labels:
+        app: event-bus
+        env: test
+    spec:
+      containers:
+      - name: event-bus
+        image: micro-event-bus:mini2
+        ports:
+        - containerPort: 4005
+        env:
+        - name: POSTS_SERVICE_URL
+          value: http://posts-srv:4000
+        - name: COMMENTS_SERVICE_URL
+          value: http://comments-srv:4001
+        - name: QUERY_SERVICE_URL
+          value: http://query-srv:4002
+        - name: MODERATION_SERVICE_URL
+          value: http://moderation-srv:4003
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
+---
+
+# Posts deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-posts
+  namespace: test
+  labels:
+    app: posts
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posts
+      env: test
+  template:
+    metadata:
+      labels:
+        app: posts
+        env: test
+    spec:
+      containers:
+      - name: posts
+        image: micro-posts:mini2
+        ports:
+        - containerPort: 4000
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          value: http://event-bus-srv:4005
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
+---
+
+# Comments deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-comments
+  namespace: test
+  labels:
+    app: comments
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments
+      env: test
+  template:
+    metadata:
+      labels:
+        app: comments
+        env: test
+    spec:
+      containers:
+      - name: comments
+        image: micro-comments:mini2
+        ports:
+        - containerPort: 4001
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          value: http://event-bus-srv:4005
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
+---
+
+# Query deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-query
+  namespace: test
+  labels:
+    app: query
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: query
+      env: test
+  template:
+    metadata:
+      labels:
+        app: query
+        env: test
+    spec:
+      containers:
+      - name: query
+        image: micro-query:mini2
+        ports:
+        - containerPort: 4002
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          value: http://event-bus-srv:4005
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
+---
+
+# Moderation deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-moderation
+  namespace: test
+  labels:
+    app: moderation
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moderation
+      env: test
+  template:
+    metadata:
+      labels:
+        app: moderation
+        env: test
+    spec:
+      containers:
+      - name: moderation
+        image: micro-moderation:mini2
+        ports:
+        - containerPort: 4003
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          value: http://event-bus-srv:4005
+        resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"

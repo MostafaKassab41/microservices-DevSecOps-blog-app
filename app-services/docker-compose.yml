@@ -63,10 +63,13 @@ services:
 
   client:
     build: ./client
-    image: micro-client:test10
+    image: micro-client:mini2
     container_name: client-srv
     ports:
       - "3000:80"  
     environment:
-      REACT_APP_POSTS_SERVICE_URL: http://localhost:4002
-      REACT_APP_COMMENTS_SERVICE_URL: http://localhost:4001
+      POSTS_SERVICE_URL: http://localhost:4000
+      QUERY_SERVICE_URL: http://localhost:4002
+      COMMENTS_SERVICE_URL: http://localhost:4001
+      VERSION: mini2
+      VERSION_COLOR: 'blue'

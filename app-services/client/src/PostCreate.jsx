@@ -4,7 +4,9 @@ const Wrapper = createContext();
 
 const PostCreate = () => {
   const [title, setTitle] = useState('');
-  const POSTS_SERVICE_URL = process.env.REACT_APP_POSTS_SERVICE_URL || 'http://localhost:4000';
+  
+  const config = window.__CONFIG__ || {};
+  const POSTS_SERVICE_URL = config.POSTS_SERVICE_URL || 'http://localhost:4000';
 
   const onSubmit = async (event) => {
     event.preventDefault();

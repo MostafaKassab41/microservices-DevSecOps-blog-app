@@ -1,0 +1,9 @@
+apiVersion: v2
+name: blog-platform
+description: Helm chart for Blog Microservices Application
+type: application
+version: 1.0.0
+appVersion: "1.0"
+maintainers:
+  - name: Mostafa Mohamed Kassab
+    email: mostafa.kassab41@gmail.com
