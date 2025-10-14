@@ -1,0 +1,62 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: test
+  # annotations:
+  #   kubernetes.io/ingress.class: "nginx"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:     # without host >> works with the cluster IP
+        paths:
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-srv
+                port:
+                  number: 80
+
+          - path: /posts
+            pathType: Prefix
+            backend:
+              service:
+                name: posts-srv
+                port:
+                  number: 4000
+
+          - path: /ok
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 3500
+
+
+    # Assign vertual subdomain for every frontend and backend 
+    # Note: use > echo "$(minikube ip) app.devops-todo.com api.devops-todo.com" | sudo tee -a /etc/hosts
+    - host: app.devops-todo.com   # Add this host to your /etc/hosts infront of the cluster IP
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 8080
+    
+    - host: api.devops-todo.com   # Add this host to your /etc/hosts infront of the cluster IP
+      http:
+        paths:
+          - path: /
+            pathType: Prefix 
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 3500
+            

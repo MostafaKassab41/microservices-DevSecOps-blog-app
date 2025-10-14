@@ -21,14 +21,16 @@ spec:
     spec:
       containers:
       - name: client
-        image: micro-client:test10
+        image: micro-client:mini2
         ports:
         - containerPort: 80
         env:
-        - name: REACT_APP_POSTS_SERVICE_URL
-          value: http://query-srv:4002     #http://localhost:4002
-        - name: REACT_APP_COMMENTS_SERVICE_URL
-          value: http://localhost:4001
+        - name: POSTS_SERVICE_URL
+          value: http://192.168.49.2
+        - name: QUERY_SERVICE_URL
+          value: http://192.168.49.2
+        - name: COMMENTS_SERVICE_URL
+          value: http://comments-srv:4001
         resources:
               requests:
                 memory: "128Mi"

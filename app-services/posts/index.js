@@ -13,7 +13,7 @@ const posts = {};
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/posts', (req, res) => {
+app.get('/post', (req, res) => {
     res.send(posts);
 });
 app.post('/posts/create', async (req, res) => {

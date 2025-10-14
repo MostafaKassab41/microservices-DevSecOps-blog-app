@@ -10,7 +10,7 @@ const PostCreate = () => {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    await axios.post(`${POSTS_SERVICE_URL}/posts/create`, { title });
+    await axios.post(`${POSTS_SERVICE_URL}/post/create`, { title });
     setTitle('');
   };
   return (
