@@ -127,7 +127,7 @@ Ensure you have:
 From the `app-services/` directory, run:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 ### 🌐 Accessing the Application
@@ -162,11 +162,16 @@ Get all posts and comments:
 curl http://localhost:4002/posts
 ```
 
+### 🔄 Event-bus Service
+Get all Events:
+```bash
+curl http://localhost:4005/events
+```
 ---
 
 ## 🧰 Clean Up
 
 Stop all services:
 ```bash
-docker-compose down
+docker compose down
 ```
