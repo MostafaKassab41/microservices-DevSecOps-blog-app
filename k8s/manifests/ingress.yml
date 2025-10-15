@@ -19,7 +19,7 @@ spec:
                 port:
                   number: 80
 
-          - path: /posts
+          - path: /post
             pathType: Prefix
             backend:
               service:
@@ -27,36 +27,18 @@ spec:
                 port:
                   number: 4000
 
-          - path: /ok
+          - path: /posts
+            pathType: Exact
+            backend:
+              service:
+                name: query-srv
+                port:
+                  number: 4002
+
+          - path: /posts/
             pathType: Prefix
             backend:
               service:
-                name: backend
+                name: comments-srv
                 port:
-                  number: 3500
-
-
-    # Assign vertual subdomain for every frontend and backend 
-    # Note: use > echo "$(minikube ip) app.devops-todo.com api.devops-todo.com" | sudo tee -a /etc/hosts
-    - host: app.devops-todo.com   # Add this host to your /etc/hosts infront of the cluster IP
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 8080
-    
-    - host: api.devops-todo.com   # Add this host to your /etc/hosts infront of the cluster IP
-      http:
-        paths:
-          - path: /
-            pathType: Prefix 
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 3500
-            
+                  number: 4001

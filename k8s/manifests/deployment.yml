@@ -26,11 +26,11 @@ spec:
         - containerPort: 80
         env:
         - name: POSTS_SERVICE_URL
-          value: http://192.168.49.2
+          value: http://192.168.49.2:80
         - name: QUERY_SERVICE_URL
-          value: http://192.168.49.2
+          value: http://192.168.49.2:80
         - name: COMMENTS_SERVICE_URL
-          value: http://comments-srv:4001
+          value: http://192.168.49.2:80
         resources:
               requests:
                 memory: "128Mi"
