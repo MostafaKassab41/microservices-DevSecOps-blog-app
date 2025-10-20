@@ -1,0 +1,84 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: {{ .Values.global.namespace | default "default" }}
+spec:
+  ingressClassName: nginx
+  rules:
+
+   {{- if .Values.ingress.hosts }}
+   - host: {{ .Values.ingress.host | quote}}
+     http:     # without host >> works with the cluster IP
+        paths:
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-client-srv
+                port:
+                  number: {{ .Values.client.ports.containerPort | default "80" }}
+
+          - path: /post
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-posts-srv
+                port:
+                  number: {{ .Values.posts.ports.containerPort | default "4000" }}
+
+          - path: /posts
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Release.Name }}-query-srv
+                port:
+                  number: {{ .Values.query.ports.containerPort | default "4002" }}
+
+          - path: /posts/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-comments-srv
+                port:
+                  number: {{ .Values.comments.ports.containerPort | default "4001" }}
+   {{- else }}
+   - http:     # without host >> works with the cluster IP
+        paths:
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-client-srv
+                port:
+                  number: {{ .Values.client.ports.containerPort | default "80" }}
+
+          - path: /post
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-posts-srv
+                port:
+                  number: {{ .Values.posts.ports.containerPort | default "4000" }}
+
+          - path: /posts
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Release.Name }}-query-srv
+                port:
+                  number: {{ .Values.query.ports.containerPort | default "4002" }}
+
+          - path: /posts/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-comments-srv
+                port:
+                  number: {{ .Values.comments.ports.containerPort | default "4001" }}
+   {{- end }}
+
+{{- end }}

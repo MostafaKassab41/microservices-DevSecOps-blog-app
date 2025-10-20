@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-event-bus
+  namespace: {{ .Values.global.namespace | default "default" }}
+  labels:
+    app: event-bus
+    env: {{ .Values.event_bus.labels.env | default "default" }}
+spec:
+  replicas: {{ .Values.event_bus.replicas }}
+  selector:
+    matchLabels:
+      app: event-bus
+      env: {{ .Values.event_bus.labels.env | default "default" }}
+  template:
+    metadata:
+      labels:
+        app: event-bus
+        env: {{ .Values.event_bus.labels.env | default "default" }}
+    spec:
+      containers:
+      - name: event-bus
+        image: {{ .Values.event_bus.image.repository }}:{{ .Values.event_bus.image.tag }}
+        ports:
+        - containerPort: {{ .Values.event_bus.ports.containerPort | default "4005" }}
+        env:
+        - name: POSTS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: POSTS_SERVICE_URL
+        - name: COMMENTS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: COMMENTS_SERVICE_URL
+        - name: QUERY_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: QUERY_SERVICE_URL
+        - name: MODERATION_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: MODERATION_SERVICE_URL
+        
+
+        resources:
+              requests:
+                memory: {{ .Values.event_bus.resources.requests.memory | default "128Mi" }}
+                cpu: {{ .Values.event_bus.resources.requests.cpu | default "100m" }}
+              limits:
+                memory: {{ .Values.event_bus.resources.limits.memory | default "512Mi" }}
+                cpu: {{ .Values.event_bus.resources.limits.cpu | default "500m" }}

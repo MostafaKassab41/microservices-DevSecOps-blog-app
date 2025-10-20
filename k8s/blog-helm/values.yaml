@@ -1,0 +1,138 @@
+global:
+  namespace: "test"
+
+ingress:
+  enabled: true
+  host: ""
+
+# -----------------------------------------
+# Frontend client deployment
+client:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-client
+    tag: mini2
+
+  ports:
+    containerPort: 80
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# -----------------------------------------
+# comments client deployment
+comments:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-comments
+    tag: mini2
+
+  ports:
+    containerPort: 4001
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# -----------------------------------------
+# event bus client deployment
+event_bus:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-event-bus
+    tag: mini2
+
+  ports:
+    containerPort: 4005
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# -----------------------------------------
+# moderation client deployment
+moderation:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-moderation
+    tag: mini2
+
+  ports:
+    containerPort: 4003
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# -----------------------------------------
+# posts client deployment
+posts:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-posts
+    tag: mini2
+
+  ports:
+    containerPort: 4000
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# -----------------------------------------
+# query client deployment
+query:
+  replicas: 1
+  labels:
+    env: test
+
+  image:
+    repository: micro-query
+    tag: mini2
+
+  ports:
+    containerPort: 4002
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"

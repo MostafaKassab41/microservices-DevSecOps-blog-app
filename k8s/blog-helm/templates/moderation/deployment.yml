@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-moderation
+  namespace: {{ .Values.global.namespace | default "default" }}
+  labels:
+    app: moderation
+    env: {{ .Values.moderation.labels.env | default "default" }}
+spec:
+  replicas: {{ .Values.moderation.replicas }}
+  selector:
+    matchLabels:
+      app: moderation
+      env: {{ .Values.moderation.labels.env | default "default" }}
+  template:
+    metadata:
+      labels:
+        app: moderation
+        env: {{ .Values.moderation.labels.env | default "default" }}
+    spec:
+      containers:
+      - name: moderation
+        image: {{ .Values.moderation.image.repository }}:{{ .Values.moderation.image.tag }}
+        ports:
+        - containerPort: {{ .Values.moderation.ports.containerPort | default "4003" }}
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: EVENT_BUS_SERVICE_URL
+        
+        resources:
+              requests:
+                memory: {{ .Values.moderation.resources.requests.memory | default "128Mi" }}
+                cpu: {{ .Values.moderation.resources.requests.cpu | default "100m" }}
+              limits:
+                memory: {{ .Values.moderation.resources.limits.memory | default "512Mi" }}
+                cpu: {{ .Values.moderation.resources.limits.cpu | default "500m" }}

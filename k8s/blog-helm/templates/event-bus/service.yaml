@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-event-bus-srv
+  namespace: {{ .Values.global.namespace | default "default" }}
+spec:
+  type: ClusterIP
+  selector:
+    app: event-bus
+    env: {{ .Values.event_bus.labels.env | default "default" }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.event_bus.ports.containerPort | default "4005" }}
+      targetPort: {{ .Values.event_bus.ports.containerPort | default "4005" }}

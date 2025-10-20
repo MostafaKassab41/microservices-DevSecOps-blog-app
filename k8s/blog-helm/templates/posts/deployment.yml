@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-posts
+  namespace: {{ .Values.global.namespace | default "default" }}
+  labels:
+    app: posts
+    env: {{ .Values.posts.labels.env | default "default" }}
+spec:
+  replicas: {{ .Values.posts.replicas }}
+  selector:
+    matchLabels:
+      app: posts
+      env: {{ .Values.posts.labels.env | default "default" }}
+  template:
+    metadata:
+      labels:
+        app: posts
+        env: {{ .Values.posts.labels.env | default "default" }}
+    spec:
+      containers:
+      - name: posts
+        image: {{ .Values.posts.image.repository }}:{{ .Values.posts.image.tag }}
+        ports:
+        - containerPort: {{ .Values.posts.ports.containerPort | default "4000" }}
+        env:
+        - name: EVENT_BUS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: EVENT_BUS_SERVICE_URL
+        
+  
+        resources:
+              requests:
+                memory: {{ .Values.posts.resources.requests.memory | default "128Mi" }}
+                cpu: {{ .Values.posts.resources.requests.cpu | default "100m" }}
+              limits:
+                memory: {{ .Values.posts.resources.limits.memory | default "512Mi" }}
+                cpu: {{ .Values.posts.resources.limits.cpu | default "500m" }}

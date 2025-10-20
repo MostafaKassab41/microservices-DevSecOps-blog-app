@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Values.global.namespace | default "default" }}
+data:
+  POSTS_SERVICE_URL: http://{{ .Release.Name }}-posts-srv:{{ .Values.posts.ports.containerPort | default "4000" }}
+  QUERY_SERVICE_URL: http://{{ .Release.Name }}-query-srv:{{ .Values.query.ports.containerPort | default "4002" }}
+  COMMENTS_SERVICE_URL: http://{{ .Release.Name }}-comments-srv:{{ .Values.comments.ports.containerPort | default "4001" }}
+  MODERATION_SERVICE_URL: http://{{ .Release.Name }}-moderation-srv:{{ .Values.moderation.ports.containerPort | default "4003" }}
+  EVENT_BUS_SERVICE_URL: http://{{ .Release.Name }}-event-bus-srv:{{ .Values.event_bus.ports.containerPort | default "4005" }}
+
+  INGRESS_HOST: http://192.168.49.2:80

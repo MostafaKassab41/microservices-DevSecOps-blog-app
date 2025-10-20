@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-client
+  namespace: {{ .Values.global.namespace | default "default" }}
+  labels:
+    app: client
+    env: {{ .Values.client.labels.env | default "default" }}
+spec:
+  replicas: {{ .Values.client.replicas }}
+  selector:
+    matchLabels:
+      app: client
+      env: {{ .Values.client.labels.env | default "default" }}
+  template:
+    metadata:
+      labels:
+        app: client
+        env: {{ .Values.client.labels.env | default "default" }}
+    spec:
+      containers:
+      - name: client
+        image: {{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}
+        ports:
+        - containerPort: {{ .Values.client.ports.containerPort | default "80" }}
+        env:
+        - name: POSTS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: INGRESS_HOST
+        - name: QUERY_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: INGRESS_HOST
+        - name: COMMENTS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: INGRESS_HOST
+
+        resources:
+              requests:
+                memory: {{ .Values.client.resources.requests.memory | default "128Mi" }}
+                cpu: {{ .Values.client.resources.requests.cpu | default "100m" }}
+              limits:
+                memory: {{ .Values.client.resources.limits.memory | default "512Mi" }}
+                cpu: {{ .Values.client.resources.limits.cpu | default "500m" }}
